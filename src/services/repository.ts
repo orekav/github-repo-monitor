@@ -1,6 +1,13 @@
 import got, { HTTPError, RequestError } from "got";
 import createHttpError from "http-errors";
-import { URL } from "../configs/github.services";
+import { URL, authorization } from "../configs/github.services";
+
+const request = got.extend({
+  headers: {
+    Authorization: authorization,
+  },
+  prefixUrl: URL,
+});
 
 const responseErrorCatcher = (error: HTTPError | RequestError) => {
   if (error instanceof HTTPError && [403, 404].includes(error.response.statusCode)) {
@@ -17,8 +24,8 @@ const responseErrorCatcher = (error: HTTPError | RequestError) => {
 
 export const getOrganization = async (organizationName: string) => {
   try {
-    const response = await got.get(
-      `${URL}/orgs/${organizationName}`,
+    const response = await request.get(
+      `orgs/${organizationName}`,
       {
         responseType: "json"
       }
@@ -46,8 +53,8 @@ const headerLinkConverter = (aHeaderLink: string): paginationLinks =>
 
 export const getOrganizationRepositories = async (organizationName: string) => {
   try {
-    const { body, headers } = await got.get(
-      `${URL}/orgs/${organizationName}/repos`,
+    const { body, headers } = await request.get(
+      `orgs/${organizationName}/repos`,
       {
         responseType: "json"
       }
@@ -66,8 +73,8 @@ export const getOrganizationRepositories = async (organizationName: string) => {
 
 export const getOrganizationRepository = async (organizationName: string, repositoryName: string) => {
   try {
-    const response = await got.get(
-      `${URL}/repos/${organizationName}/${repositoryName}`,
+    const response = await request.get(
+      `repos/${organizationName}/${repositoryName}`,
       {
         responseType: "json"
       }

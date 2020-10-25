@@ -17,7 +17,7 @@ import { URL } from "../configs/github.services";
 
 describe("[Service] Repository", () => {
 
-  beforeEach(() => {
+  beforeAll(() => {
     const github = nock(URL);
 
     github
@@ -97,7 +97,7 @@ describe("[Service] Repository", () => {
       const { repositories, links } = await getOrganizationRepositories("organizationWithoutRepositories");
       expect(repositories).toEqual([]);
       expect(links).toEqual({});
-    })
+    });
 
     it("should return organization not found", async () => {
       await expect(getOrganizationRepositories("notFound"))
@@ -108,12 +108,6 @@ describe("[Service] Repository", () => {
     it("should return Facebook React repository", async () => {
       const repository = await getOrganizationRepository("facebook", "react");
       expect(repository).toEqual(facebookReactRepositorySuccessResponseBody);
-    });
-
-    it("should return not found", async () => {
-      await expect(getOrganizationRepository("facebook", "notFound"))
-        .rejects
-        .toEqual(new createHttpError.NotFound(JSON.stringify(facebookNotFoundRepositoryResponseBody)));
     });
 
     it("should return not found", async () => {
