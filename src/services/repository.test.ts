@@ -1,59 +1,88 @@
-import { getOrganization } from "./repository";
+import { getOrganization, getOrganizationRepositories, getOrganizationRepository } from "./repository";
 import nock from "nock";
+import createHttpError from "http-errors";
+import {
+  apiRateLimitResponseBody,
+  facebookOrganizationSuccessResponseBody,
+  notFoundOrganizationResponseBody,
+  facebookOrganizationRepositoriesSuccessResponseBody,
+  facebookOrganizationRespositoriesSuccessHeaders,
+  facebookReactRepositorySuccessResponseBody,
+  facebookNotFoundRepositoryResponseBody,
+} from "./__mocks__/repository";
+import { URL } from "../configs/github.services";
+
 
 describe("[Service] Repository", () => {
-  const successResponseBody = {
-    login: "facebook",
-    id: 69631,
-    node_id: "MDEyOk9yZ2FuaXphdGlvbjY5NjMx",
-    url: "https://api.github.com/orgs/facebook",
-    repos_url: "https://api.github.com/orgs/facebook/repos",
-    events_url: "https://api.github.com/orgs/facebook/events",
-    hooks_url: "https://api.github.com/orgs/facebook/hooks",
-    issues_url: "https://api.github.com/orgs/facebook/issues",
-    members_url: "https://api.github.com/orgs/facebook/members{/member}",
-    public_members_url: "https://api.github.com/orgs/facebook/public_members{/member}",
-    avatar_url: "https://avatars3.githubusercontent.com/u/69631?v=4",
-    description: "We are working to build community through open source technology. NB: members must have two-factor auth.",
-    name: "Facebook",
-    company: null as null,
-    blog: "https://opensource.fb.com",
-    location: "Menlo Park, California",
-    email: null as null,
-    twitter_username: null as null,
-    is_verified: true,
-    has_organization_projects: true,
-    has_repository_projects: true,
-    public_repos: 124,
-    public_gists: 12,
-    followers: 0,
-    following: 0,
-    html_url: "https://github.com/facebook",
-    created_at: "2009-04-02T03:35:22Z",
-    updated_at: "2020-05-28T20:20:25Z",
-    type: "Organization"
-  };
-  const notFoundResponseBody = {
-    message: "Not Found",
-    documentation_url: "https://docs.github.com/rest/reference/orgs#get-an-organization"
-  };
-  const github = nock("https://api.github.com");
-  github
-    .get("/orgs/facebook")
-    .reply(200, successResponseBody);
 
-  github
-    .get("/orgs/notFound")
-    .reply(404, notFoundResponseBody);
+  beforeEach(() => {
+    const github = nock(URL);
+
+    github
+      .get("/orgs/facebook")
+      .reply(200, facebookOrganizationSuccessResponseBody)
+
+    github
+      .get("/orgs/notFound")
+      .reply(404, notFoundOrganizationResponseBody);
+
+    github
+      .get("/orgs/__rateLimit__")
+      .reply(403, apiRateLimitResponseBody);
+
+    github
+      .get("/orgs/facebook/repos")
+      .reply(
+        200,
+        facebookOrganizationRepositoriesSuccessResponseBody,
+        facebookOrganizationRespositoriesSuccessHeaders
+      );
+
+    github
+      .get("/repos/facebook/react")
+      .reply(200, facebookReactRepositorySuccessResponseBody);
+
+    github
+      .get("/repos/facebook/notFound")
+      .reply(404, facebookNotFoundRepositoryResponseBody);
+
+  });
 
   it("should return Facebook organization", async () => {
     const organization = await getOrganization("facebook");
-    expect(organization).toEqual(successResponseBody)
+    expect(organization).toEqual(facebookOrganizationSuccessResponseBody)
   });
 
   it("should return not found", async () => {
     await expect(getOrganization("notFound"))
       .rejects
-      .toThrowError(JSON.stringify(notFoundResponseBody));
+      .toEqual(new createHttpError.NotFound(JSON.stringify(notFoundOrganizationResponseBody)));
   });
+
+  it("should return 'API rate limit exceeded...'", async () => {
+    await expect(getOrganization("__rateLimit__"))
+      .rejects
+      .toEqual(new createHttpError.Forbidden(JSON.stringify(apiRateLimitResponseBody)));
+  });
+
+  describe("Get repositories", () => {
+
+    it("should return Facebook first repositories", async () => {
+      const { repositories, links } = await getOrganizationRepositories("facebook");
+      console.dir(links);
+    });
+
+    it("should return Facebook React repository", async () => {
+      const repository = await getOrganizationRepository("facebook", "react");
+      expect(repository).toEqual(facebookReactRepositorySuccessResponseBody);
+    });
+
+    it("should return not found", async () => {
+      await expect(getOrganizationRepository("facebook", "notFound"))
+        .rejects
+        .toEqual(new createHttpError.NotFound(JSON.stringify(facebookNotFoundRepositoryResponseBody)));
+    });
+
+  });
+
 })

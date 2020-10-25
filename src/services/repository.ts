@@ -1,17 +1,71 @@
-import got from "got";
+import got, { HTTPError } from "got";
 import createHttpError from "http-errors";
+import { URL } from "../configs/github.services";
+
+const responseErrorCatcher = (error: HTTPError) => {
+  const { statusCode, body } = error.response;
+  throw new createHttpError[statusCode](JSON.stringify(body));
+};
 
 export const getOrganization = async (organizationName: string) => {
   try {
     const response = await got.get(
-      `https://api.github.com/orgs/${organizationName}`,
+      `${URL}/orgs/${organizationName}`,
       {
         responseType: "json"
       }
     );
     return response.body;
   } catch (error) {
-    const { statusCode, body } = error.response;
-    throw new createHttpError[statusCode](JSON.stringify(body));
+    responseErrorCatcher(error);
+  }
+};
+
+type paginationLinks = {
+  first?: string,
+  last?: string,
+  prev?: string,
+  next?: string,
+};
+
+const headerLinkConverter = (aHeaderLink: string): paginationLinks =>
+  aHeaderLink.split(", ").map(e => e.split("; "))
+    .map(([url, rel]) => ({
+      url: url.replace(/\</, "").replace(/\>/, ""),
+      rel: rel.replace("rel=", "").replace(/\//g, "").replace(/\"/g, ""),
+    }))
+    .reduce((acc, link) => ({ ...acc, [link.rel]: link.url }), {});
+
+export const getOrganizationRepositories = async (organizationName: string) => {
+  try {
+    const { body, headers } = await got.get(
+      `${URL}/orgs/${organizationName}/repos`,
+      {
+        responseType: "json"
+      }
+    );
+
+    const links = headers.link ? headerLinkConverter(headers.link as string) : {}
+
+    return {
+      repositories: body,
+      links
+    };
+  } catch (error) {
+    responseErrorCatcher(error);
+  }
+};
+
+export const getOrganizationRepository = async (organizationName: string, repositoryName: string) => {
+  try {
+    const response = await got.get(
+      `${URL}/repos/${organizationName}/${repositoryName}`,
+      {
+        responseType: "json"
+      }
+    );
+    return response.body;
+  } catch (error) {
+    responseErrorCatcher(error);
   }
 };
