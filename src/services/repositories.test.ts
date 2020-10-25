@@ -1,70 +1,21 @@
-import { getOrganization, getOrganizationRepositories, getOrganizationRepository } from "./repository";
-import nock from "nock";
+import { getOrganization, getOrganizationRepositories, getOrganizationRepository } from "./repositories";
 import createHttpError from "http-errors";
 import {
   apiRateLimitResponseBody,
   facebookOrganizationSuccessResponseBody,
   notFoundOrganizationResponseBody,
   facebookOrganizationRepositoriesSuccessResponseBody,
-  facebookOrganizationRespositoriesSuccessHeaders,
   facebookOrganizationRepositoriesLinks,
   notFoundOrganizationRepositoriesResponseBody,
   facebookReactRepositorySuccessResponseBody,
   facebookNotFoundRepositoryResponseBody,
-} from "./__mocks__/repository";
-import { URL } from "../configs/github.services";
-
+} from "./__mocks__/repositories";
 
 describe("[Service] Repository", () => {
 
-  beforeAll(() => {
-    const github = nock(URL);
-
-    github
-      .get("/orgs/facebook")
-      .reply(200, facebookOrganizationSuccessResponseBody)
-
-    github
-      .get("/orgs/notFound")
-      .reply(404, notFoundOrganizationResponseBody);
-
-    github
-      .get("/orgs/__rateLimit__")
-      .reply(403, apiRateLimitResponseBody);
-
-    github
-      .get("/orgs/__serviceUnavailable__")
-      .replyWithError({});
-
-    github
-      .get("/orgs/facebook/repos")
-      .reply(
-        200,
-        facebookOrganizationRepositoriesSuccessResponseBody,
-        facebookOrganizationRespositoriesSuccessHeaders
-      );
-
-    github
-      .get("/orgs/organizationWithoutRepositories/repos")
-      .reply(200, []);
-
-    github
-      .get("/orgs/notFound/repos")
-      .reply(404, notFoundOrganizationRepositoriesResponseBody);
-
-    github
-      .get("/repos/facebook/react")
-      .reply(200, facebookReactRepositorySuccessResponseBody);
-
-    github
-      .get("/repos/facebook/notFound")
-      .reply(404, facebookNotFoundRepositoryResponseBody);
-
-  });
-
   it("should return Facebook organization", async () => {
     const organization = await getOrganization("facebook");
-    expect(organization).toEqual(facebookOrganizationSuccessResponseBody)
+    expect(organization).toEqual(facebookOrganizationSuccessResponseBody);
   });
 
   it("should return not found", async () => {

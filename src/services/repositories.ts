@@ -4,7 +4,7 @@ import { URL, authorization } from "../configs/github.services";
 
 const request = got.extend({
   headers: {
-    Authorization: authorization,
+    Authorization: authorization(),
   },
   prefixUrl: URL,
 });
