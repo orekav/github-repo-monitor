@@ -44,6 +44,16 @@ export const facebookOrganizationRespositoriesSuccessHeaders = {
   link: '<https://api.github.com/organizations/69631/repos?page=2>; rel="next", <https://api.github.com/organizations/69631/repos?page=5>; rel="last"',
 };
 
+export const facebookOrganizationRepositoriesLinks = {
+  next: "https://api.github.com/organizations/69631/repos?page=2",
+  last: "https://api.github.com/organizations/69631/repos?page=5"
+};
+
+export const notFoundOrganizationRepositoriesResponseBody = {
+  "message": "Not Found",
+  "documentation_url": "https://docs.github.com/rest/reference/repos#list-organization-repositories"
+};
+
 export const facebookOrganizationRepositoriesSuccessResponseBody = [
   {
     "id": 165883,

@@ -1,1 +1,1 @@
-export const URL = process.env.GITHUB_API_URL || "https://api.github.com";
+export const URL = process.env.GITHUB_API_URL || "https://___api.github.com";

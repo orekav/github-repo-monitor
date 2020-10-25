@@ -7,6 +7,8 @@ import {
   notFoundOrganizationResponseBody,
   facebookOrganizationRepositoriesSuccessResponseBody,
   facebookOrganizationRespositoriesSuccessHeaders,
+  facebookOrganizationRepositoriesLinks,
+  notFoundOrganizationRepositoriesResponseBody,
   facebookReactRepositorySuccessResponseBody,
   facebookNotFoundRepositoryResponseBody,
 } from "./__mocks__/repository";
@@ -31,12 +33,24 @@ describe("[Service] Repository", () => {
       .reply(403, apiRateLimitResponseBody);
 
     github
+      .get("/orgs/__serviceUnavailable__")
+      .replyWithError({});
+
+    github
       .get("/orgs/facebook/repos")
       .reply(
         200,
         facebookOrganizationRepositoriesSuccessResponseBody,
         facebookOrganizationRespositoriesSuccessHeaders
       );
+
+    github
+      .get("/orgs/organizationWithoutRepositories/repos")
+      .reply(200, []);
+
+    github
+      .get("/orgs/notFound/repos")
+      .reply(404, notFoundOrganizationRepositoriesResponseBody);
 
     github
       .get("/repos/facebook/react")
@@ -59,6 +73,12 @@ describe("[Service] Repository", () => {
       .toEqual(new createHttpError.NotFound(JSON.stringify(notFoundOrganizationResponseBody)));
   });
 
+  it("shoukd return serviceUnavailable", async () => {
+    await expect(getOrganization("__serviceUnavailable__"))
+      .rejects
+      .toEqual(new createHttpError.ServiceUnavailable(JSON.stringify({ message: "GitHub is not available" })));
+  });
+
   it("should return 'API rate limit exceeded...'", async () => {
     await expect(getOrganization("__rateLimit__"))
       .rejects
@@ -67,14 +87,33 @@ describe("[Service] Repository", () => {
 
   describe("Get repositories", () => {
 
-    it("should return Facebook first repositories", async () => {
+    it("should return Facebook first repositories with pagination links", async () => {
       const { repositories, links } = await getOrganizationRepositories("facebook");
-      console.dir(links);
+      expect(repositories).toEqual(facebookOrganizationRepositoriesSuccessResponseBody);
+      expect(links).toEqual(facebookOrganizationRepositoriesLinks);
+    });
+
+    it("should return an empty array of repositories and no pagination links", async () => {
+      const { repositories, links } = await getOrganizationRepositories("organizationWithoutRepositories");
+      expect(repositories).toEqual([]);
+      expect(links).toEqual({});
+    })
+
+    it("should return organization not found", async () => {
+      await expect(getOrganizationRepositories("notFound"))
+        .rejects
+        .toEqual(new createHttpError.NotFound(JSON.stringify(notFoundOrganizationRepositoriesResponseBody)));
     });
 
     it("should return Facebook React repository", async () => {
       const repository = await getOrganizationRepository("facebook", "react");
       expect(repository).toEqual(facebookReactRepositorySuccessResponseBody);
+    });
+
+    it("should return not found", async () => {
+      await expect(getOrganizationRepository("facebook", "notFound"))
+        .rejects
+        .toEqual(new createHttpError.NotFound(JSON.stringify(facebookNotFoundRepositoryResponseBody)));
     });
 
     it("should return not found", async () => {

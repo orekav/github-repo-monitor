@@ -1,10 +1,18 @@
-import got, { HTTPError } from "got";
+import got, { HTTPError, RequestError } from "got";
 import createHttpError from "http-errors";
 import { URL } from "../configs/github.services";
 
-const responseErrorCatcher = (error: HTTPError) => {
-  const { statusCode, body } = error.response;
-  throw new createHttpError[statusCode](JSON.stringify(body));
+const responseErrorCatcher = (error: HTTPError | RequestError) => {
+  if (error instanceof HTTPError && [403, 404].includes(error.response.statusCode)) {
+    const { statusCode, body } = error.response;
+    throw new createHttpError[statusCode](JSON.stringify(body));
+  }
+  else {
+    const returnObject = {
+      message: "GitHub is not available"
+    };
+    throw new createHttpError.ServiceUnavailable(JSON.stringify(returnObject));
+  }
 };
 
 export const getOrganization = async (organizationName: string) => {
