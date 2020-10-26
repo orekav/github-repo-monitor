@@ -3,4 +3,3 @@ version: "3.6"
 services:
   api:
     build: .
-    command: sh -c "npm start"

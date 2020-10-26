@@ -6,7 +6,7 @@ import { connection } from "../models/index";
 import { Collection, MongoClient } from "mongodb";
 import { facebookReactRepositorySuccessResponseBody } from "../services/__mocks__/repositories";
 
-describe.only("[Model] repositories", () => {
+describe("[Model] repositories", () => {
   let client: MongoClient;
   let collection: Collection<any>;
 

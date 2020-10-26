@@ -1,0 +1,16 @@
+version: "3.6"
+
+services:
+  mongodb:
+    image: mongo:4.0
+    ports:
+      - 27017:27017
+    tmpfs:
+      - /data/db
+
+  api:
+    environment:
+      - NODE_ENV=test
+      - GITHUB_API_URL=https://api.github.com
+      - MONGO_URL=mongodb://mongodb
+    command: sh -c "npm run build && npm start"
