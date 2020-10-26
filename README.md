@@ -18,6 +18,9 @@ The API will start on port 8080
 * /repositories/:organizationName
 * /repositories/:organizationName/:repositoryName
 
+### Frontend
+> http://localhost
+
 You can add a GitHub username and password to be able to do more request
 In docker-compose.production.yml add:
 * GITHUB_USERNAME=your_username

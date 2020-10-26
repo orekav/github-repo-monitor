@@ -19,3 +19,12 @@ services:
     command: sh -c "npm run build && npm start"
     depends_on:
       - mongodb
+  
+  frontend:
+    build: ./frontend
+    environment:
+      - PORT=80
+      - REACT_APP_API_URL=http://api:8080
+    ports:
+      - 80:80
+    command: sh -c "npm start"
