@@ -11,5 +11,6 @@ module.exports = {
     "^.+\\.(ts|tsx)$": "ts-jest",
   },
   testMatch: ["**/*.test.(ts|js)"],
+  testPathIgnorePatterns: ["/node_modules/", "frontend/"],
   testEnvironment: "node",
 };
