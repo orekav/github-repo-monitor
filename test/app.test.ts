@@ -1,13 +1,20 @@
+import { MongoClient } from "mongodb";
 import App from "../src/app";
+import { connect } from "../src/models";
 
 describe("App suite", () => {
+  let client: MongoClient;
 
-  beforeAll((done) => {
-    // wait MongoDB connection
+  beforeAll(async (done) => {
+    client = await connect();
     done();
   });
 
-  it("should Index to be falsy", () => {
+  afterAll(async () => {
+    await client.close();
+  });
+
+  it("should be truthy", () => {
     expect(App).toBeTruthy();
   });
 

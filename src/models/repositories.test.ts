@@ -2,7 +2,7 @@ import {
   repositoriesCollection,
   findRepository
 } from "./repositories";
-import { connection } from "../models/index";
+import { connect } from "../models/index";
 import { Collection, MongoClient } from "mongodb";
 import { facebookReactRepositorySuccessResponseBody } from "../services/__mocks__/repositories";
 
@@ -11,7 +11,7 @@ describe("[Model] repositories", () => {
   let collection: Collection<any>;
 
   beforeAll(async () => {
-    client = await connection;
+    client = await connect();
     collection = await repositoriesCollection;
   });
 
