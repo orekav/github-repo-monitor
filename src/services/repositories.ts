@@ -1,6 +1,7 @@
 import got, { HTTPError, RequestError } from "got";
 import createHttpError from "http-errors";
 import { URL, authorization } from "../configs/github.services";
+import querystring from "querystring";
 
 const request = got.extend({
   headers: {
@@ -51,10 +52,16 @@ const headerLinkConverter = (aHeaderLink: string): paginationLinks =>
     }))
     .reduce((acc, link) => ({ ...acc, [link.rel]: link.url }), {});
 
-export const getOrganizationRepositories = async (organizationName: string) => {
+export type GitHubQueryParams = {
+  page?: number,
+  per_page?: number,
+};
+
+export const getOrganizationRepositories = async (organizationName: string, queryParams: GitHubQueryParams = {}) => {
+  const query = querystring.encode(queryParams);
   try {
     const { body, headers } = await request.get(
-      `orgs/${organizationName}/repos`,
+      `orgs/${organizationName}/repos?${query}`,
       {
         responseType: "json"
       }

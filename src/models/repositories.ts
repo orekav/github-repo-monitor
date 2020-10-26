@@ -1,7 +1,10 @@
 import { retrieveCollection } from "."
-import { getOrganizationRepository } from "../services/repositories";
+import { getOrganizationRepository, getOrganizationRepositories, getOrganization } from "../services/repositories";
 
-export const repositoriesCollection = retrieveCollection("repositories"); 
+export const repositoriesCollection = retrieveCollection("repositories");
+
+export const findOrganization = getOrganization;
+export const findRepositories = getOrganizationRepositories;
 
 export const findRepository = async (organizationName: string, repositoryName: string): Promise<any> => {
   const collection = await repositoriesCollection;
@@ -18,5 +21,5 @@ export const findRepository = async (organizationName: string, repositoryName: s
 
   delete repository._id;
 
-  return repository;  
+  return repository;
 };

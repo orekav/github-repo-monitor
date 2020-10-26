@@ -11,6 +11,9 @@ services:
   api:
     environment:
       - NODE_ENV=test
+      - PORT=8080
       - GITHUB_API_URL=https://api.github.com
       - MONGO_URL=mongodb://mongodb
+    ports:
+      - 8080:8080
     command: sh -c "npm run build && npm start"

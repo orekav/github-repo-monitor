@@ -1,12 +1,14 @@
 import App from "../src/app";
 
-describe("Dummy suite", () => {
-  it("should true not to be false", () => {
-    expect(true).not.toBe(false);
+describe("App suite", () => {
+
+  beforeAll((done) => {
+    // wait MongoDB connection
+    done();
   });
 
   it("should Index to be falsy", () => {
-    expect(App).toBeFalsy();
+    expect(App).toBeTruthy();
   });
 
 });

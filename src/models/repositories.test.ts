@@ -25,5 +25,5 @@ describe("[Model] repositories", () => {
 
     expect(findOne).toHaveBeenCalledTimes(2);
     expect(findOne).toHaveReturnedWith(Promise.resolve(facebookReactRepositorySuccessResponseBody));
-  })
+  });
 })
